@@ -17,19 +17,19 @@ using namespace std;
 //Student struct declaration
 struct Student
 {
-  char firstname [20];
-  char lastname [20];
+  string firstname;
+  string lastname;
   int studentid;
   float gpa;
   
-  Student* next;
+  Student* next = NULL;
 };
 
 //function declaration
-void add(Student*); //add to the hash table
-void print();
+void add(Student*, Student**, int &); //add to the hash table
+void print(Student**, int);
 void remove(int ID);
-int hash(); //this is the hash function that will return an index
+int hashStudent(Student*, int); //this is the hash function that will return an index
 string generateFirst(); //this will generate a random first name
 string generateLast(); //this will generate a random last name
 
@@ -37,10 +37,20 @@ int main() {
 	cout << "Welcome to Student List.  Type ADD to add students, PRINT to print student information, and DELETE to remove a student's information." << endl;
 	cout << "Additionally, type GENERATE to randomly generate and add new students.  Finally, type QUIT to quit." << endl;
 
+	srand(time(NULL));
+	
 	char invalid = 'y';
-	string input;
-
+	char input[20];
+	//start size
+	int length = 100;
+	Student** table = new Student*[length];
+	//set all pointers to NULL
+	for(int i = 0; i <= length; i++) {
+		table[i] = NULL;
+	}
+	
 	while (invalid == 'y'){
+		cout << "Enter command: " << endl;
 		cin >> input;
 		if (!strcmp(input, "ADD")){
 			Student* a = new Student;
@@ -52,9 +62,9 @@ int main() {
 			cin >> a->studentid;
 			cout << "Enter GPA: " << endl;
 			cin >> a->gpa;
-			add(a);
+			add(a, table, length);
 		}else if (!strcmp(input, "PRINT")){
-			print();
+			print(table, length);
 		}else if (!strcmp(input, "DELETE")){
 			int ID;
 			cout << "Enter ID Number: " << endl;
@@ -65,17 +75,16 @@ int main() {
 			int iterations = 0;
 			cout << "# of students: " << endl;
 			cin >> number;
+			int ID = 123456;
 			while(iterations < number) {
-				int ID = 123456;
 				Student* a = new Student;
 				a->firstname = generateFirst();
 				a->lastname = generateLast();
-				a->id = ID;
-				srand(time(NULL));
+				a->studentid = ID;
 				double decimal = (double)rand()/(RAND_MAX);
 				int integer = rand() % 5;
 				a->gpa = decimal + integer;
-				add(a);
+				add(a, table, length);
 				ID++; 
 				iterations++;
 			}
@@ -91,25 +100,77 @@ int main() {
 }
 
 //add to the hash table
-void add(Student* a) {
+void add(Student* a, Student** table, int & length) {
+	int index = hashStudent(a, length);
+	cout << "Hash: " << index << endl;
+	cout << a->firstname << endl;
 	
+	if (table[index] == NULL) {
+		table[index] = a;
+	} else { //chain
+		Student* head = table[index];
+		int counter = 1;
+		while (head->next != NULL) {
+			head = head->next;
+			counter++;
+		}
+		head->next = a;
+		//overflow chain (need to resize table)
+		if (counter >= 3) {
+			cout << "Overflowed" << endl;
+			Student** newTable = new Student*[length*2];
+			int newlen = length*2;
+			for(int i = 0; i < newlen; i++) {
+				newTable[i] = NULL;
+			}
+			cout << "SPOT 101 " << newTable[101] << endl;
+			for(int i = 0; i < length; i++) {
+				Student* head = table[i];
+				while(head != NULL) {
+					Student* next = head->next;
+					head->next = NULL;
+					add(head, newTable, newlen);
+					head = next;
+				}
+			}
+			
+			table = newTable;
+			length = newlen;
+		}
+	}
 }
 
-void print() {
-	
+void print(Student** table, int length) {
+	for(int i = 0; i < length; i++) {
+		cout << i << endl;
+		Student* head = table[i];
+		while(head != NULL) {
+			cout << head->lastname << ", " << head->firstname << " | " << head->studentid << " | " << head->gpa << endl;
+			head = head->next;
+		}
+	}
 }
+
 void remove(int ID) {
 	
 }
 
 //this is the hash function that will return an index
-int hash() {
-
+int hashStudent(Student* a, int length) {
+	//iterate through the string and add up the ASCII values
+	// int total = 0;
+	// for (string::iterator it = a->firstname.begin(); it != a->firstname.end(); it++) {
+		// total += *it;
+	// }
+	// return (total % length);
+	
+	//hash based on ID
+	return (a->studentid % length);
+	
 }
 
 //this will generate a random first name	
 string generateFirst() {
-	srand(time(NULL));
 	ifstream file;
 	string fileName = "firstnames.txt";
 	file.open(fileName);
@@ -124,7 +185,6 @@ string generateFirst() {
 
 //this will generate a random last name	
 string generateLast() {
-	srand(time(NULL));
 	ifstream file;
 	string fileName = "lastnames.txt";
 	file.open(fileName);
