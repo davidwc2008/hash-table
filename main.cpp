@@ -26,9 +26,9 @@ struct Student
 };
 
 //function declaration
-void add(Student*, Student**, int &); //add to the hash table
+void add(Student*, Student** &, int &); //add to the hash table
 void print(Student**, int);
-void remove(int ID);
+void remove(int ID, Student** &table, int length);
 int hashStudent(Student*, int); //this is the hash function that will return an index
 string generateFirst(); //this will generate a random first name
 string generateLast(); //this will generate a random last name
@@ -41,6 +41,8 @@ int main() {
 	
 	char invalid = 'y';
 	char input[20];
+	//for generate
+	int ID = 123456;
 	//start size
 	int length = 100;
 	Student** table = new Student*[length];
@@ -69,13 +71,12 @@ int main() {
 			int ID;
 			cout << "Enter ID Number: " << endl;
 			cin >> ID;
-			remove(ID); 
+			remove(ID, table, length); 
 		}else if (!strcmp(input, "GENERATE")) {
 			int number = 0;
 			int iterations = 0;
 			cout << "# of students: " << endl;
 			cin >> number;
-			int ID = 123456;
 			while(iterations < number) {
 				Student* a = new Student;
 				a->firstname = generateFirst();
@@ -100,7 +101,7 @@ int main() {
 }
 
 //add to the hash table
-void add(Student* a, Student** table, int & length) {
+void add(Student* a, Student** &table, int & length) {
 	int index = hashStudent(a, length);
 	cout << "Hash: " << index << endl;
 	cout << a->firstname << endl;
@@ -123,7 +124,7 @@ void add(Student* a, Student** table, int & length) {
 			for(int i = 0; i < newlen; i++) {
 				newTable[i] = NULL;
 			}
-			cout << "SPOT 101 " << newTable[101] << endl;
+			// cout << "SPOT 101 " << newTable[101] << endl;
 			for(int i = 0; i < length; i++) {
 				Student* head = table[i];
 				while(head != NULL) {
@@ -151,8 +152,24 @@ void print(Student** table, int length) {
 	}
 }
 
-void remove(int ID) {
-	
+void remove(int ID, Student** &table, int length) {
+	int index = ID % length;
+	Student* head = table[index];
+	Student* temp = head;
+	if (head->studentid == ID) {
+		table[index] = head->next;
+		delete head;
+	} else {
+		while(head->studentid != ID) {
+			temp = head;
+			head = head->next;
+		}
+		//there are two cases here (if head->next == NULL or != NULL)
+		Student* todelete = head;
+		temp->next = head->next;
+		delete todelete;
+		}
+	}
 }
 
 //this is the hash function that will return an index
@@ -165,7 +182,7 @@ int hashStudent(Student* a, int length) {
 	// return (total % length);
 	
 	//hash based on ID
-	return (a->studentid % length);
+	return (a->studentid % length); //better hash function
 	
 }
 
