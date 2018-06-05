@@ -168,9 +168,9 @@ void remove(int ID, Student** &table, int length) {
 		Student* todelete = head;
 		temp->next = head->next;
 		delete todelete;
-		}
 	}
 }
+
 
 //this is the hash function that will return an index
 int hashStudent(Student* a, int length) {
