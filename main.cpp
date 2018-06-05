@@ -46,6 +46,8 @@ int main() {
 	//start size
 	int length = 100;
 	Student** table = new Student*[length];
+	int idArray = new int[length];
+	int counter = 0;
 	//set all pointers to NULL
 	for(int i = 0; i <= length; i++) {
 		table[i] = NULL;
@@ -62,9 +64,23 @@ int main() {
 			cin >> a->lastname;
 			cout << "Enter student id: " << endl;
 			cin >> a->studentid;
+			bool notdone = true;
+			while(notdone) {
+				for(int i = 0; i < length; i++) {
+					if (idArray[i] = a->studentid) {
+						cout << "ID already in use.  Enter new ID: " << endl;
+						cin >> a->studentid;
+						break;
+					}
+					notdone = false;
+				}
+			}
+			idArray[counter] = a->studentid;
+			counter++;
 			cout << "Enter GPA: " << endl;
 			cin >> a->gpa;
 			add(a, table, length);
+			// ID = (a->studentid)++; //so the generate doesn't make the same one
 		}else if (!strcmp(input, "PRINT")){
 			print(table, length);
 		}else if (!strcmp(input, "DELETE")){
@@ -81,7 +97,19 @@ int main() {
 				Student* a = new Student;
 				a->firstname = generateFirst();
 				a->lastname = generateLast();
+				bool notdone = true;
+				while(notdone) {
+					for(int i = 0; i < length; i++) {
+						if (idArray[i] = ID) {
+							ID++;
+							break;
+						}
+						notdone = false;
+					}
+				}
 				a->studentid = ID;
+				idArray[counter] = ID;
+				counter++;
 				double decimal = (double)rand()/(RAND_MAX);
 				int integer = rand() % 5;
 				a->gpa = decimal + integer;
